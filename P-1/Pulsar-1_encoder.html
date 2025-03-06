@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pulsar-1 Text Encoder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #282c34;
+            color: #ffffff;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 400px;
+            border-radius: 8px;
+            background-color: #3b3f47;
+        }
+        #inputText {
+            font-size: 16px;
+            margin-top: 16px;
+            padding: 12px;
+            width: 100%;
+            border-radius: 4px;
+            color: #ffffff;
+            background-color: #21252b;
+            border: none;
+            resize: none; /* Prevent resizing */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+        }
+        button {
+            margin-top: 12px;
+            padding: 12px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #61dafb;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #21a1f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Pulsar-1 Text Encoder</h2>
+        <textarea id="inputText" rows="5" placeholder="Enter your text here..."></textarea>
+        <button onclick="startEncoding()">Encode</button>
+    </div>
+
+    <script>
+        const baseFrequency = 300; // Base frequency for 'a'
+        const frequencyStep = 500; // Step frequency for each subsequent letter
+        const dotFrequency = 1200;  // Frequency for dot (.)
+        const commaFrequency = 1300; // Frequency for comma (,)
+        const spaceFrequency = 2000; // Frequency for space
+        const duration = 300;        // Duration for each tone in milliseconds
+        const pauseDuration = 100;   // Pause duration between tones in milliseconds
+
+        function startEncoding() {
+            const input = document.getElementById('inputText').value.toLowerCase();
+            const alphabet = "abcdefghijklmnopqrstuvwxyz., "; // Include comma and dot
+            let encodedFrequencies = [];
+
+            for (let char of input) {
+                const charIndex = alphabet.indexOf(char);
+                if (charIndex !== -1) {
+                    if (char === ' ') {
+                        encodedFrequencies.push(spaceFrequency);
+                    } else if (char === '.') {
+                        encodedFrequencies.push(dotFrequency);
+                    } else if (char === ',') {
+                        encodedFrequencies.push(commaFrequency);
+                    } else {
+                        const frequency = baseFrequency + (charIndex * frequencyStep);
+                        encodedFrequencies.push(frequency);
+                    }
+                    encodedFrequencies.push(0); // Pause after each character
+                }
+            }
+
+            playFrequencies(encodedFrequencies);
+        }
+
+        function playFrequencies(frequencies) {
+            let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            let oscillator;
+            let time = audioContext.currentTime;
+
+            for (let freq of frequencies) {
+                if (freq > 0) {
+                    oscillator = audioContext.createOscillator();
+                    oscillator.frequency.setValueAtTime(freq, time);
+                    oscillator.connect(audioContext.destination);
+                    oscillator.start(time);
+                    oscillator.stop(time + (duration / 1000));
+                    time += (duration / 1000) + (pauseDuration / 1000); // Move to the next time slot
+                } else {
+                    time += (pauseDuration / 1000); // Add pause duration
+                }
+            }
+        }
+    </script>
+</body>
+</html>

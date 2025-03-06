@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pulsar-1 Text Decoder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #282c34;
+            color: #ffffff;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 400px;
+            border-radius: 8px;
+            background-color: #3b3f47;
+        }
+        #decodedText {
+            font-size: 18px;
+            margin-top: 16px;
+            padding: 12px;
+            background-color: #21252b;
+            border-radius: 4px;
+            color: #61dafb;
+            height: 100px; /* Fixed height for better visibility */
+            overflow-y: auto; /* Scroll if text exceeds */
+        }
+        button {
+            margin-top: 12px;
+            padding: 12px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #61dafb;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #21a1f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Pulsar-1 Text Decoder</h2>
+        <button onclick="startDecoding()">Start Listening</button>
+        <p id="decodedText">Listening for encoded message...</p>
+    </div>
+
+    <script>
+        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let decodedMessage = "";
+        const baseFrequency = 300;
+        const frequencyStep = 500;
+        const dotFrequency = 1200;  // Frequency for dot (.)
+        const commaFrequency = 1300; // Frequency for comma (,)
+        const spaceFrequency = 2000; // Frequency for space
+        const noiseThreshold = 50;
+        const alphabet = "abcdefghijklmnopqrstuvwxyz., "; // Include dot and comma
+        let lastDetectedChar = '';
+        let debounceCount = 0;
+        let lastDetectedSymbol = ''; // Track last detected symbol (dot/comma)
+
+        async function startDecoding() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const microphone = audioContext.createMediaStreamSource(stream);
+            const analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+            microphone.connect(analyser);
+
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            const amplitudeHistory = new Float32Array(5);
+
+            function decodeTone() {
+                analyser.getByteFrequencyData(dataArray);
+
+                let sumAmplitude = 0;
+                for (let i = 0; i < amplitudeHistory.length; i++) {
+                    sumAmplitude += amplitudeHistory[i];
+                }
+                const averageAmplitude = sumAmplitude / amplitudeHistory.length;
+
+                amplitudeHistory.copyWithin(1);
+                amplitudeHistory[0] = Math.max(...dataArray);
+
+                let highestIndex = -1;
+                let maxAmplitude = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    if (dataArray[i] > maxAmplitude) {
+                        maxAmplitude = dataArray[i];
+                        highestIndex = i;
+                    }
+                }
+
+                const effectiveThreshold = noiseThreshold + averageAmplitude * 0.5;
+
+                if (maxAmplitude > effectiveThreshold) {
+                    const detectedFrequency = highestIndex * (audioContext.sampleRate / analyser.fftSize);
+                    const charIndex = Math.round((detectedFrequency - baseFrequency) / frequencyStep);
+
+                    if (Math.abs(detectedFrequency - spaceFrequency) < 50) {
+                        decodedMessage += ' ';
+                        document.getElementById("decodedText").textContent = decodedMessage;
+                    } else if (Math.abs(detectedFrequency - dotFrequency) < 50) {
+                        if (lastDetectedSymbol !== 'dot') {
+                            decodedMessage += '.';
+                            document.getElementById("decodedText").textContent = decodedMessage;
+                            lastDetectedSymbol = 'dot'; // Update last detected symbol
+                        }
+                    } else if (Math.abs(detectedFrequency - commaFrequency) < 50) {
+                        if (lastDetectedSymbol !== 'comma') {
+                            decodedMessage += ',';
+                            document.getElementById("decodedText").textContent = decodedMessage;
+                            lastDetectedSymbol = 'comma'; // Update last detected symbol
+                        }
+                    } else if (charIndex >= 0 && charIndex < alphabet.length) {
+                        const detectedChar = alphabet[charIndex];
+
+                        if (detectedChar !== lastDetectedChar) {
+                            debounceCount++;
+                            if (debounceCount > 5) {
+                                decodedMessage += detectedChar;
+                                document.getElementById("decodedText").textContent = decodedMessage;
+                                lastDetectedChar = detectedChar;
+                                debounceCount = 0;
+                            }
+                        }
+                    }
+                } else {
+                    lastDetectedChar = '';
+                    lastDetectedSymbol = ''; // Reset last detected symbol
+                    debounceCount = 0;
+                }
+
+                requestAnimationFrame(decodeTone);
+            }
+            decodeTone();
+        }
+    </script>
+</body>
+</html>
