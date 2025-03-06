@@ -34,7 +34,7 @@ saveButton.addEventListener("click", () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "score.txt"; // File name
+  a.download = "score.scr"; // File name
   a.click();
   URL.revokeObjectURL(url);
   alert("Score saved!");
