@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impossible Pong</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+        }
+        #gameArea {
+            position: relative;
+            width: 800px;
+            height: 400px;
+            background-color: #333;
+            overflow: hidden;
+            display: none; /* Hide game area initially */
+        }
+        .paddle {
+            position: absolute;
+            width: 10px;
+            height: 80px;
+            background-color: #fff;
+        }
+        #paddle1 {
+            left: 0;
+            top: 160px;
+        }
+        #paddle2 {
+            right: 0;
+            top: 160px;
+        }
+        #ball {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #fff;
+            border-radius: 50%;
+            left: 392.5px;
+            top: 192.5px;
+        }
+        #stopwatch {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-size: 24px;
+        }
+        #titleScreen {
+            text-align: center;
+            color: #fff;
+        }
+        #titleScreen h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        #difficulty {
+            margin-bottom: 20px;
+        }
+        #difficulty button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #fff;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        #difficulty button:hover {
+            background-color: #ddd;
+        }
+        #startButton {
+            padding: 10px 20px;
+            font-size: 24px;
+            background-color: #fff;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #startButton:hover {
+            background-color: #ddd;
+        }
+        #gameOverScreen {
+            display: none;
+            text-align: center;
+            color: #fff;
+        }
+        #gameOverScreen h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        #gameOverScreen p {
+            font-size: 24px;
+        }
+        #restartButton {
+            padding: 10px 20px;
+            font-size: 20px;
+            background-color: #fff;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        #restartButton:hover {
+            background-color: #ddd;
+        }
+        #changeDifficultyButton {
+            padding: 10px 20px;
+            font-size: 20px;
+            background-color: #fff;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        #changeDifficultyButton:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Screen -->
+    <div id="titleScreen">
+        <h1>Impossible Pong</h1>
+        <div id="difficulty">
+            <button id="slowButton">Slow</button>
+            <button id="mediumButton">Medium</button>
+            <button id="fastButton">Fast</button>
+        </div>
+        <button id="startButton">Start Game</button>
+    </div>
+
+    <!-- Game Area -->
+    <div id="gameArea">
+        <div id="paddle1" class="paddle"></div>
+        <div id="paddle2" class="paddle"></div>
+        <div id="ball"></div>
+        <div id="stopwatch">Time: 0.00s</div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen">
+        <h2>You Lost!</h2>
+        <p>You survived for <span id="survivalTime">0.00</span> seconds.</p>
+        <button id="restartButton">Restart Game</button>
+        <button id="changeDifficultyButton">Change Difficulty</button>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const paddle1 = document.getElementById('paddle1');
+        const paddle2 = document.getElementById('paddle2');
+        const ball = document.getElementById('ball');
+        const stopwatch = document.getElementById('stopwatch');
+        const titleScreen = document.getElementById('titleScreen');
+        const startButton = document.getElementById('startButton');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const survivalTime = document.getElementById('survivalTime');
+        const restartButton = document.getElementById('restartButton');
+        const changeDifficultyButton = document.getElementById('changeDifficultyButton');
+        const slowButton = document.getElementById('slowButton');
+        const mediumButton = document.getElementById('mediumButton');
+        const fastButton = document.getElementById('fastButton');
+
+        let paddle1Y = 160;
+        let paddle2Y = 160;
+        let ballX = 392.5;
+        let ballY = 192.5;
+        let ballSpeedX = 2; // Default ball speed
+        let ballSpeedY = 2; // Default ball speed
+        let gameStartTime = 0;
+        let gameActive = false;
+
+        const paddleHeight = 80;
+        const gameHeight = 400;
+        const gameWidth = 800;
+
+        // Set difficulty (ball speed)
+        slowButton.addEventListener('click', () => {
+            ballSpeedX = 2;
+            ballSpeedY = 2;
+            updateDifficultySelection('slow');
+        });
+        mediumButton.addEventListener('click', () => {
+            ballSpeedX = 4;
+            ballSpeedY = 4;
+            updateDifficultySelection('medium');
+        });
+        fastButton.addEventListener('click', () => {
+            ballSpeedX = 6;
+            ballSpeedY = 6;
+            updateDifficultySelection('fast');
+        });
+
+        function updateDifficultySelection(selectedDifficulty) {
+            // Remove active class from all buttons
+            slowButton.classList.remove('active');
+            mediumButton.classList.remove('active');
+            fastButton.classList.remove('active');
+            // Add active class to the selected button
+            if (selectedDifficulty === 'slow') slowButton.classList.add('active');
+            if (selectedDifficulty === 'medium') mediumButton.classList.add('active');
+            if (selectedDifficulty === 'fast') fastButton.classList.add('active');
+        }
+
+        // Track mouse movement for Player 2 (right paddle)
+        document.addEventListener('mousemove', (event) => {
+            if (!gameActive) return; // Only move paddle if the game is active
+            const rect = gameArea.getBoundingClientRect();
+            const mouseY = event.clientY - rect.top; // Get mouse Y position relative to the game area
+            paddle2Y = mouseY - paddleHeight / 2; // Center the paddle on the mouse
+            paddle2Y = Math.max(0, Math.min(paddle2Y, gameHeight - paddleHeight)); // Keep paddle within bounds
+            paddle2.style.top = `${paddle2Y}px`;
+        });
+
+        // Start the game when the button is clicked
+        startButton.addEventListener('click', () => {
+            titleScreen.style.display = 'none'; // Hide title screen
+            gameArea.style.display = 'block'; // Show game area
+            resetGame();
+            gameActive = true;
+            gameStartTime = Date.now();
+            gameLoop();
+        });
+
+        // Restart the game when the restart button is clicked
+        restartButton.addEventListener('click', () => {
+            gameOverScreen.style.display = 'none'; // Hide game over screen
+            gameArea.style.display = 'block'; // Show game area
+            resetGame();
+            gameActive = true;
+            gameStartTime = Date.now();
+            gameLoop();
+        });
+
+        // Go back to title screen to change difficulty
+        changeDifficultyButton.addEventListener('click', () => {
+            gameOverScreen.style.display = 'none'; // Hide game over screen
+            titleScreen.style.display = 'block'; // Show title screen
+        });
+
+        function resetGame() {
+            ballX = gameWidth / 2 - 7.5;
+            ballY = gameHeight / 2 - 7.5;
+            paddle1Y = 160;
+            paddle2Y = 160;
+            paddle1.style.top = `${paddle1Y}px`;
+            paddle2.style.top = `${paddle2Y}px`;
+            ball.style.left = `${ballX}px`;
+            ball.style.top = `${ballY}px`;
+        }
+
+        function updatePaddles() {
+            // AI for Player 1 (left paddle) - follows the ball perfectly
+            paddle1Y = ballY - paddleHeight / 2; // Center the paddle on the ball
+            paddle1Y = Math.max(0, Math.min(paddle1Y, gameHeight - paddleHeight)); // Keep paddle within bounds
+            paddle1.style.top = `${paddle1Y}px`;
+        }
+
+        function updateBall() {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // Ball collision with top and bottom walls
+            if (ballY <= 0 || ballY >= gameHeight - 15) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            // Ball collision with paddles
+            if (ballX <= 10 && ballY + 15 >= paddle1Y && ballY <= paddle1Y + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+                ballX = 10; // Clamp ball position to prevent visual overlap
+            }
+            if (ballX >= gameWidth - 25 && ballY + 15 >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+                ballX = gameWidth - 25; // Clamp ball position to prevent visual overlap
+            }
+
+            // Ball out of bounds (game over only on the right side)
+            if (ballX >= gameWidth - 15) {
+                endGame();
+            }
+            if (ballX <= 0) {
+                ballSpeedX = -ballSpeedX; // Bounce back on the left wall
+            }
+
+            ball.style.left = `${ballX}px`;
+            ball.style.top = `${ballY}px`;
+        }
+
+        function endGame() {
+            gameActive = false;
+            const survivalSeconds = ((Date.now() - gameStartTime) / 1000).toFixed(2);
+            survivalTime.textContent = survivalSeconds;
+            gameArea.style.display = 'none'; // Hide game area
+            gameOverScreen.style.display = 'block'; // Show game over screen
+        }
+
+        function gameLoop() {
+            if (!gameActive) return; // Stop the game loop if the game is over
+            updatePaddles();
+            updateBall();
+            const elapsedTime = ((Date.now() - gameStartTime) / 1000).toFixed(2);
+            stopwatch.textContent = `Time: ${elapsedTime}s`;
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>

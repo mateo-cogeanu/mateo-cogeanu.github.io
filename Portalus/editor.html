@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<link rel="icon" type="image/x-icon" href="favicon2.ico">
+<html>
+<head>
+    <title>Portal Level Editor</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #editor-container {
+            display: flex;
+            flex: 1;
+        }
+        #canvas-container {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background-color: #111;
+            transform-origin: 0 0;
+        }
+        #toolbar {
+            width: 250px;
+            padding: 10px;
+            background-color: #333;
+            overflow-y: auto;
+        }
+        #controls {
+            padding: 10px;
+            background-color: #444;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            margin: 0;
+            padding: 8px 12px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #666;
+        }
+        .tool-button {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        .active-tool {
+            background-color: #00a2ff;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-top: 10px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="number"] {
+            width: 60px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 4px;
+        }
+        .grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            opacity: 0.2;
+            transform-origin: 0 0;
+        }
+        .zoom-controls {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.7);
+            padding: 5px;
+            border-radius: 5px;
+            z-index: 10;
+        }
+        a:link, a:visited {
+            margin: 0;
+            padding: 8px 12px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+}
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <button id="save-btn">Save Level</button>
+        <button id="load-btn">Load Level</button>
+        <button id="clear-btn">Clear Level</button>
+        <a href="index.html">Back To Menu</a>
+        <div>
+            <label>
+                Grid Size:
+                <input type="number" id="grid-size" value="40" min="10" max="100" step="10">
+            </label>
+        </div>
+        <div>
+            <label>
+                Snap to Grid:
+                <input type="checkbox" id="snap-grid" checked>
+            </label>
+        </div>
+        <div>
+            <label>
+                Canvas Width:
+                <input type="number" id="canvas-width" value="800" min="400" max="2000" step="20">
+            </label>
+        </div>
+        <div>
+            <label>
+                Canvas Height:
+                <input type="number" id="canvas-height" value="600" min="300" max="2000" step="20">
+            </label>
+        </div>
+    </div>
+    
+    <div id="editor-container">
+        <div id="toolbar">
+            <h3>Tools</h3>
+            <button class="tool-button active-tool" data-tool="wall">Wall</button>
+            <button class="tool-button" data-tool="player">Player Start</button>
+            <button class="tool-button" data-tool="erase">Eraser</button>
+            
+            <h3>Current Level</h3>
+            <div id="level-info">
+                <p>Walls: <span id="wall-count">0</span></p>
+                <p>Player Start: <span id="player-pos">Not set</span></p>
+            </div>
+            
+            <h3>Level JSON</h3>
+            <textarea id="level-json" readonly></textarea>
+            <button id="copy-btn">Copy JSON</button>
+        </div>
+        
+        <div id="canvas-container">
+            <canvas id="editor-canvas" width="800" height="600"></canvas>
+            <canvas id="grid-canvas" class="grid" width="800" height="600"></canvas>
+            <div class="zoom-controls">
+                <button id="zoom-in">+</button>
+                <button id="zoom-out">-</button>
+                <span id="zoom-level">100%</span>
+                <button id="zoom-reset">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('editor-canvas');
+        const gridCanvas = document.getElementById('grid-canvas');
+        const ctx = canvas.getContext('2d');
+        const gridCtx = gridCanvas.getContext('2d');
+        
+        // UI elements
+        const toolButtons = document.querySelectorAll('.tool-button');
+        const wallCount = document.getElementById('wall-count');
+        const playerPos = document.getElementById('player-pos');
+        const levelJson = document.getElementById('level-json');
+        const gridSizeInput = document.getElementById('grid-size');
+        const snapGridCheckbox = document.getElementById('snap-grid');
+        const canvasWidthInput = document.getElementById('canvas-width');
+        const canvasHeightInput = document.getElementById('canvas-height');
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+        const zoomResetBtn = document.getElementById('zoom-reset');
+        const zoomLevelDisplay = document.getElementById('zoom-level');
+        
+        // Editor state
+        const editor = {
+            tool: 'wall',
+            walls: [],
+            playerStart: null,
+            gridSize: 40,
+            snapToGrid: true,
+            isDrawing: false,
+            currentWall: null,
+            zoom: 1,
+            canvasWidth: 800,
+            canvasHeight: 600,
+            offsetX: 0,
+            offsetY: 0,
+            isPanning: false,
+            lastPanX: 0,
+            lastPanY: 0
+        };
+        
+        // Initialize canvas
+        function initCanvas() {
+            updateCanvasSize();
+            drawGrid();
+            render();
+            
+            // Event listeners
+            window.addEventListener('resize', handleWindowResize);
+            gridSizeInput.addEventListener('change', updateGridSize);
+            snapGridCheckbox.addEventListener('change', updateSnapToGrid);
+            canvasWidthInput.addEventListener('change', updateCanvasSize);
+            canvasHeightInput.addEventListener('change', updateCanvasSize);
+            
+            // Tool selection
+            toolButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    toolButtons.forEach(btn => btn.classList.remove('active-tool'));
+                    button.classList.add('active-tool');
+                    editor.tool = button.dataset.tool;
+                });
+            });
+            
+            // Canvas events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+            canvas.addEventListener('wheel', handleWheel, { passive: false });
+            canvas.addEventListener('mousedown', startPan);
+            document.addEventListener('mousemove', handlePan);
+            document.addEventListener('mouseup', stopPan);
+            
+            // Button events
+            document.getElementById('save-btn').addEventListener('click', saveLevel);
+            document.getElementById('load-btn').addEventListener('click', loadLevel);
+            document.getElementById('clear-btn').addEventListener('click', clearLevel);
+            document.getElementById('copy-btn').addEventListener('click', copyJson);
+            zoomInBtn.addEventListener('click', () => adjustZoom(0.1));
+            zoomOutBtn.addEventListener('click', () => adjustZoom(-0.1));
+            zoomResetBtn.addEventListener('click', resetZoom);
+        }
+        
+        // Update canvas size
+        function updateCanvasSize() {
+            editor.canvasWidth = parseInt(canvasWidthInput.value);
+            editor.canvasHeight = parseInt(canvasHeightInput.value);
+            
+            canvas.width = editor.canvasWidth;
+            canvas.height = editor.canvasHeight;
+            gridCanvas.width = editor.canvasWidth;
+            gridCanvas.height = editor.canvasHeight;
+            
+            drawGrid();
+            render();
+            updateLevelInfo();
+        }
+        
+        // Handle window resize
+        function handleWindowResize() {
+            // We don't need to resize the canvas itself, just adjust the view
+            applyTransform();
+        }
+        
+        // Draw grid
+        function drawGrid() {
+            gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+            gridCtx.strokeStyle = '#555';
+            gridCtx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let x = 0; x <= gridCanvas.width; x += editor.gridSize) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(x, 0);
+                gridCtx.lineTo(x, gridCanvas.height);
+                gridCtx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = 0; y <= gridCanvas.height; y += editor.gridSize) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(0, y);
+                gridCtx.lineTo(gridCanvas.width, y);
+                gridCtx.stroke();
+            }
+            
+            applyTransform();
+        }
+        
+        // Update grid size
+        function updateGridSize() {
+            editor.gridSize = parseInt(gridSizeInput.value);
+            drawGrid();
+        }
+        
+        // Update snap to grid setting
+        function updateSnapToGrid() {
+            editor.snapToGrid = snapGridCheckbox.checked;
+        }
+        
+        // Convert screen coordinates to canvas coordinates
+        function screenToCanvas(x, y) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (x - rect.left - editor.offsetX) / editor.zoom,
+                y: (y - rect.top - editor.offsetY) / editor.zoom
+            };
+        }
+        
+        // Snap coordinate to grid
+        function snapToGrid(coord) {
+            if (!editor.snapToGrid) return coord;
+            return Math.round(coord / editor.gridSize) * editor.gridSize;
+        }
+        
+        // Start drawing
+        function startDrawing(e) {
+            if (e.button !== 0) return; // Only left mouse button
+            
+            const canvasPos = screenToCanvas(e.clientX, e.clientY);
+            const x = snapToGrid(canvasPos.x);
+            const y = snapToGrid(canvasPos.y);
+            
+            editor.isDrawing = true;
+            
+            switch (editor.tool) {
+                case 'wall':
+                    editor.currentWall = { x1: x, y1: y, x2: x, y2: y };
+                    break;
+                case 'player':
+                    editor.playerStart = { x, y };
+                    render();
+                    updateLevelInfo();
+                    break;
+                case 'erase':
+                    eraseAt(x, y);
+                    break;
+            }
+        }
+        
+        // Draw
+        function draw(e) {
+            if (!editor.isDrawing) return;
+            
+            const canvasPos = screenToCanvas(e.clientX, e.clientY);
+            const x = snapToGrid(canvasPos.x);
+            const y = snapToGrid(canvasPos.y);
+            
+            switch (editor.tool) {
+                case 'wall':
+                    if (editor.currentWall) {
+                        editor.currentWall.x2 = x;
+                        editor.currentWall.y2 = y;
+                        render();
+                    }
+                    break;
+                case 'erase':
+                    eraseAt(x, y);
+                    break;
+            }
+        }
+        
+        // Stop drawing
+        function stopDrawing() {
+            if (editor.tool === 'wall' && editor.currentWall) {
+                // Only add wall if it has some size
+                if (editor.currentWall.x1 !== editor.currentWall.x2 ||
+                    editor.currentWall.y1 !== editor.currentWall.y2) {
+                    
+                    // Normalize wall coordinates (x1,y1 is top-left, x2,y2 is bottom-right)
+                    const x1 = Math.min(editor.currentWall.x1, editor.currentWall.x2);
+                    const y1 = Math.min(editor.currentWall.y1, editor.currentWall.y2);
+                    const x2 = Math.max(editor.currentWall.x1, editor.currentWall.x2);
+                    const y2 = Math.max(editor.currentWall.y1, editor.currentWall.y2);
+                    
+                    editor.walls.push({
+                        x: x1,
+                        y: y1,
+                        width: x2 - x1,
+                        height: y2 - y1
+                    });
+                    
+                    updateLevelInfo();
+                }
+            }
+            
+            editor.isDrawing = false;
+            editor.currentWall = null;
+            render();
+        }
+        
+        // Erase at position
+        function eraseAt(x, y) {
+            // Check walls
+            const wallIndex = editor.walls.findIndex(wall =>
+                x >= wall.x && x <= wall.x + wall.width &&
+                y >= wall.y && y <= wall.y + wall.height
+            );
+            
+            if (wallIndex !== -1) {
+                editor.walls.splice(wallIndex, 1);
+                updateLevelInfo();
+                render();
+            }
+            
+            // Check player start
+            if (editor.playerStart &&
+                Math.abs(editor.playerStart.x - x) < 20 &&
+                Math.abs(editor.playerStart.y - y) < 20) {
+                editor.playerStart = null;
+                updateLevelInfo();
+                render();
+            }
+        }
+        
+        // Render the editor
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw walls
+            ctx.fillStyle = '#555';
+            editor.walls.forEach(wall => {
+                ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+            });
+            
+            // Draw player start
+            if (editor.playerStart) {
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(editor.playerStart.x, editor.playerStart.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Draw current wall being placed
+            if (editor.currentWall) {
+                ctx.strokeStyle = '#00a2ff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.rect(
+                    editor.currentWall.x1,
+                    editor.currentWall.y1,
+                    editor.currentWall.x2 - editor.currentWall.x1,
+                    editor.currentWall.y2 - editor.currentWall.y1
+                );
+                ctx.stroke();
+            }
+            
+            applyTransform();
+        }
+        
+        // Apply zoom and pan transform
+        function applyTransform() {
+            canvas.style.transform = `translate(${editor.offsetX}px, ${editor.offsetY}px) scale(${editor.zoom})`;
+            gridCanvas.style.transform = `translate(${editor.offsetX}px, ${editor.offsetY}px) scale(${editor.zoom})`;
+        }
+        
+        // Update level info
+        function updateLevelInfo() {
+            wallCount.textContent = editor.walls.length;
+            
+            if (editor.playerStart) {
+                playerPos.textContent = `${editor.playerStart.x}, ${editor.playerStart.y}`;
+            } else {
+                playerPos.textContent = "Not set";
+            }
+            
+            // Update JSON preview
+            updateJsonPreview();
+        }
+        
+        // Update JSON preview
+        function updateJsonPreview() {
+            const levelData = {
+                player: editor.playerStart || { x: Math.round(canvas.width / 2), y: Math.round(canvas.height / 2) },
+                walls: editor.walls.map(wall => ({
+                    x: wall.x,
+                    y: wall.y,
+                    width: wall.width,
+                    height: wall.height
+                }))
+            };
+            
+            levelJson.value = JSON.stringify(levelData, null, 2);
+        }
+        
+        // Save level
+        function saveLevel() {
+            const levelData = {
+                player: editor.playerStart || { x: Math.round(canvas.width / 2), y: Math.round(canvas.height / 2) },
+                walls: editor.walls.map(wall => ({
+                    x: wall.x,
+                    y: wall.y,
+                    width: wall.width,
+                    height: wall.height
+                }))
+            };
+            
+            const dataStr = JSON.stringify(levelData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'portal_level.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Load level
+        function loadLevel() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = event => {
+                    try {
+                        const levelData = JSON.parse(event.target.result);
+                        
+                        // Validate level data
+                        if (!levelData.walls || !Array.isArray(levelData.walls)) {
+                            throw new Error("Invalid level format");
+                        }
+                        
+                        // Update canvas size to match level if needed
+                        let maxX = 0;
+                        let maxY = 0;
+                        
+                        levelData.walls.forEach(wall => {
+                            maxX = Math.max(maxX, wall.x + wall.width);
+                            maxY = Math.max(maxY, wall.y + wall.height);
+                        });
+                        
+                        if (levelData.player) {
+                            maxX = Math.max(maxX, levelData.player.x + 50);
+                            maxY = Math.max(maxY, levelData.player.y + 50);
+                        }
+                        
+                        // Add 20% padding
+                        maxX = Math.max(800, maxX * 1.2);
+                        maxY = Math.max(600, maxY * 1.2);
+                        
+                        // Update canvas size
+                        canvasWidthInput.value = Math.round(maxX);
+                        canvasHeightInput.value = Math.round(maxY);
+                        updateCanvasSize();
+                        
+                        editor.walls = levelData.walls;
+                        editor.playerStart = levelData.player || null;
+                        
+                        updateLevelInfo();
+                        render();
+                        resetZoom();
+                    } catch (error) {
+                        alert("Error loading level: " + error.message);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+        
+        // Clear level
+        function clearLevel() {
+            if (confirm("Are you sure you want to clear the level?")) {
+                editor.walls = [];
+                editor.playerStart = null;
+                updateLevelInfo();
+                render();
+            }
+        }
+        
+        // Copy JSON to clipboard
+        function copyJson() {
+            levelJson.select();
+            document.execCommand('copy');
+            alert("Level JSON copied to clipboard!");
+        }
+        
+        // Zoom functions
+        function adjustZoom(delta) {
+            const oldZoom = editor.zoom;
+            editor.zoom = Math.min(3, Math.max(0.1, editor.zoom + delta));
+            zoomLevelDisplay.textContent = `${Math.round(editor.zoom * 100)}%`;
+            
+            // Adjust offset to zoom toward center
+            const rect = canvas.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            editor.offsetX -= (centerX - editor.offsetX) * (editor.zoom / oldZoom - 1);
+            editor.offsetY -= (centerY - editor.offsetY) * (editor.zoom / oldZoom - 1);
+            
+            applyTransform();
+        }
+        
+        function resetZoom() {
+            editor.zoom = 1;
+            editor.offsetX = 0;
+            editor.offsetY = 0;
+            zoomLevelDisplay.textContent = "100%";
+            applyTransform();
+        }
+        
+        // Pan functions
+        function startPan(e) {
+            if (e.button === 2 || e.button === 1) { // Right or middle mouse button
+                editor.isPanning = true;
+                editor.lastPanX = e.clientX;
+                editor.lastPanY = e.clientY;
+                canvas.style.cursor = 'grabbing';
+            }
+        }
+        
+        function handlePan(e) {
+            if (editor.isPanning) {
+                editor.offsetX += e.clientX - editor.lastPanX;
+                editor.offsetY += e.clientY - editor.lastPanY;
+                editor.lastPanX = e.clientX;
+                editor.lastPanY = e.clientY;
+                applyTransform();
+            }
+        }
+        
+        function stopPan() {
+            editor.isPanning = false;
+            canvas.style.cursor = '';
+        }
+        
+        // Mouse wheel zoom
+        function handleWheel(e) {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                adjustZoom(e.deltaY * -0.001);
+            }
+        }
+        
+        // Initialize the editor
+        initCanvas();
+        
+        // Prevent context menu
+        document.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
+</body>
+</html>
