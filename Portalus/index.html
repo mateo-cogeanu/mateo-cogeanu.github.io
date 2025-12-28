@@ -1,3 +1,130 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:2c8961840e314b32ff447b715be7f3d0ed589af39477c3d6af8c89cea6edbae3
-size 3690
+<!DOCTYPE html>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<html>
+<head>
+    <title>PORTALUS</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle at 25% 25%, #222 0%, transparent 40%),
+                radial-gradient(circle at 75% 75%, #222 0%, transparent 40%);
+        }
+        
+        .container {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 162, 255, 0.3);
+            border: 1px solid #00a2ff;
+            max-width: 500px;
+        }
+        
+        h1 {
+            color: #00a2ff;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px rgba(0, 162, 255, 0.5);
+        }
+        
+        .button {
+            display: inline-block;
+            margin: 15px;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            color: white;
+            background-color: #333;
+            border: 2px solid #00a2ff;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 200px;
+            box-shadow: 0 0 15px rgba(0, 162, 255, 0.3);
+        }
+        
+        .button:hover {
+            background-color: #00a2ff;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 162, 255, 0.7);
+        }
+        
+        .button.game {
+            border-color: #00a2ff;
+        }
+        
+        .button.editor {
+            border-color: #ff7b00;
+        }
+        
+        .button.game:hover {
+            background-color: #00a2ff;
+            box-shadow: 0 0 20px rgba(0, 162, 255, 0.7);
+        }
+        
+        .button.editor:hover {
+            background-color: #ff7b00;
+            box-shadow: 0 0 20px rgba(255, 123, 0, 0.7);
+        }
+        
+        .logo {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #00a2ff;
+            text-shadow: 0 0 15px rgba(0, 162, 255, 0.7);
+        }
+        
+        .portal {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            opacity: 0.3;
+            z-index: -1;
+        }
+        
+        .blue-portal {
+            background: radial-gradient(circle, #00a2ff, transparent 70%);
+            top: 20%;
+            left: 20%;
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        .orange-portal {
+            background: radial-gradient(circle, #ff7b00, transparent 70%);
+            bottom: 20%;
+            right: 20%;
+            animation: float 10s infinite ease-in-out reverse;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, 20px); }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="blue-portal portal"></div>
+    <div class="orange-portal portal"></div>
+    
+    <div class="container">
+        <div class="logo"></div>
+        <h1>PORTALUS</h1>
+
+        <a href="portalus.html" class="button game">PLAY GAME</a>
+        <a href="editor.html" class="button editor">LEVEL EDITOR</a>
+        <a href="https://github.com/mateo-cogeanu/PORTALUS" class="button editor">GITHUB</a>
+    </div>
+</body>
+</html>

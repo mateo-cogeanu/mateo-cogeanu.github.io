@@ -1,3 +1,3 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:d97765f76d34725d6c73439a432c326a35352e4da1c6a3b07405ffeff9333de2
-size 28
+argparse
+numpy
+opencv-python
