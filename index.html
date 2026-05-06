@@ -1,72 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My GitHub Pages Homepage</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 1rem 0;
-            text-align: center;
-        }
-        nav {
-            margin: 20px 0;
-            text-align: center;
-        }
-        nav a {
-            margin: 0 15px;
-            text-decoration: none;
-            color: #4CAF50;
-            font-weight: bold;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        footer {
-            text-align: center;
-            padding: 1rem 0;
-            background-color: #333;
-            color: white;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-    </style>
+    <title>Mateo Cogeanu</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <header>
-        <h1>Welcome to My GitHub Pages</h1>
-    </header>
 
-    <nav>
-        <a href="projects.html">Projects</a>
-        <a href="https://mateo.cogeanu.com">mateo.cogeanu.com</a>
-        <a href="social.html">Socials</a>
-        <a href="tools.html">Tools</a>
-        <a href="games.html">Games</a>
+<body>
+    <nav class="site-shell site-nav" aria-label="Main navigation">
+        <a class="brand" href="index.html">
+            <img class="brand-mark" src="assets/CogiArt_1.jpg" alt="CogiArt logo">
+            <span>Mateo Cogeanu</span>
+        </a>
+        <div class="nav-links">
+            <a class="active" href="index.html">Home</a>
+            <a href="projects.html">Projects</a>
+            <a href="tools.html">Tools</a>
+            <a href="games.html">Games</a>
+            <a href="social.html">Social</a>
+            <a href="https://mateo.cogeanu.com">Main Site</a>
+        </div>
     </nav>
 
-    <div class="container">
-        <h2>Home</h2>
-        <p>Hello! This is the homepage of my GitHub Pages site. Feel free to explore the links above to learn more about me and my projects.</p>
-    </div>
+    <header class="site-shell hero">
+        <div>
+            <p class="eyebrow">Personal lab</p>
+            <h1>Experiments, games, tools, and strange ideas.</h1>
+            <p class="hero-copy">A compact home for the things I build: playful projects, utility tools, and side quests that are still finding their final form.</p>
+            <div class="action-row">
+                <a class="button primary" href="projects.html">View Projects</a>
+                <a class="button" href="games.html">Enter Games</a>
+            </div>
+        </div>
+    </header>
 
-  
+    <main>
+        <section class="site-shell section">
+            <div class="section-heading">
+                <h2>Featured Paths</h2>
+                <p>Jump straight into the parts of the site that are most worth exploring.</p>
+            </div>
+            <div class="grid">
+                <a class="card wide" href="projects.html">
+                    <span class="kicker">Builds</span>
+                    <h3>Projects</h3>
+                    <p>Arcade experiments, translators, wave tools, and portals into tiny worlds.</p>
+                </a>
+                <a class="card" href="tools.html">
+                    <span class="kicker">Utilities</span>
+                    <h3>Tools</h3>
+                    <p>Useful technical experiments like FileToVideo and Pulsar-1.</p>
+                </a>
+                <a class="card" href="games.html">
+                    <span class="kicker">Play</span>
+                    <h3>Games</h3>
+                    <p>A separate zone with its own mood, gravity, and glow.</p>
+                </a>
+                <a class="card wide" href="social.html">
+                    <span class="kicker">Connect</span>
+                    <h3>Socials</h3>
+                    <p>Find the external places where the work, videos, and updates live.</p>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-shell footer">
+        Built on GitHub Pages.
+    </footer>
 </body>
+
 </html>

@@ -1,91 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect with Me</title>
-    <style>
-        /* Existing styles from index.html */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 1rem 0;
-            text-align: center;
-        }
-        nav {
-            margin: 20px 0;
-            text-align: center;
-        }
-        nav a {
-            margin: 0 15px;
-            text-decoration: none;
-            color: #4CAF50;
-            font-weight: bold;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        footer {
-            text-align: center;
-            padding: 1rem 0;
-            background-color: #333;
-            color: white;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-
-        /* Social Media Links Styles */
-        .social-links {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .social-links a {
-            margin: 0 15px;
-            text-decoration: none;
-            color: #4CAF50;
-            font-weight: bold;
-            transition: color 0.3s ease;
-        }
-
-        .social-links a:hover {
-            color: #45a049;
-            text-decoration: underline;
-        }
-    </style>
+    <title>Social | Mateo Cogeanu</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <header>
-        <h1>Connect with Me</h1>
-    </header>
 
-    <!-- Navigation Menu with Home Button -->
-    <nav>
-        <a href="index.html">Home</a>  
+<body>
+    <nav class="site-shell site-nav" aria-label="Main navigation">
+        <a class="brand" href="index.html">
+            <img class="brand-mark" src="assets/CogiArt_1.jpg" alt="CogiArt logo">
+            <span>Mateo Cogeanu</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="projects.html">Projects</a>
+            <a href="tools.html">Tools</a>
+            <a href="games.html">Games</a>
+            <a class="active" href="social.html">Social</a>
+        </div>
     </nav>
 
-    <!-- Connect with Me Content -->
-    <div class="container">
-        <h2>Connect with Me</h2>
-        <div class="social-links">
-            <a href="https://github.com/mateo-cogeanu" target="_blank">GitHub</a>
-            <a href="https://www.youtube.com/c/CogiArt" target="_blank">YouTube</a>
-            <a href="https://www.youtube.com/c/CogiArt" target="_blank">Linktree</a>
+    <header class="site-shell hero">
+        <div>
+            <p class="eyebrow">Connect</p>
+            <h1>Follow the trail outside this site.</h1>
+            <p class="hero-copy">The main links for code, videos, and wherever the next update happens to land.</p>
         </div>
-    </div>
+    </header>
 
+    <main class="site-shell section">
+        <div class="section-heading">
+            <h2>Social Links</h2>
+            <p>External places open in a new tab so you can keep this hub nearby.</p>
+        </div>
+        <div class="grid">
+            <a class="card" href="https://github.com/mateo-cogeanu" target="_blank" rel="noreferrer">
+                <span class="kicker">Code</span>
+                <h3>GitHub</h3>
+                <p>Repos, experiments, and public project work.</p>
+            </a>
+            <a class="card" href="https://www.youtube.com/c/CogiArt" target="_blank" rel="noreferrer">
+                <span class="kicker">Video</span>
+                <h3>YouTube</h3>
+                <p>Videos and creative uploads from CogiArt.</p>
+            </a>
+            <a class="card" href="https://www.youtube.com/c/CogiArt" target="_blank" rel="noreferrer">
+                <span class="kicker">Links</span>
+                <h3>Linktree</h3>
+                <p>A quick doorway to the wider collection of links.</p>
+            </a>
+        </div>
+    </main>
+
+    <footer class="site-shell footer">
+        Connect with Mateo Cogeanu.
+    </footer>
+</body>
+
+</html>

@@ -4,76 +4,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Gamess</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 1rem 0;
-            text-align: center;
-        }
-
-        nav {
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        nav a {
-            margin: 0 15px;
-            text-decoration: none;
-            color: #4CAF50;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        footer {
-            text-align: center;
-            padding: 1rem 0;
-            background-color: #333;
-            color: white;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-    </style>
+    <title>Games | Mateo Cogeanu</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
-    <header>
-        <h1>My Games</h1>
-    </header>
-
-    <nav>
-        <a href="index.html">Home</a>
+<body class="universe">
+    <nav class="site-shell site-nav" aria-label="Main navigation">
+        <a class="brand" href="index.html">
+            <img class="brand-mark" src="assets/CogiArt_1.jpg" alt="CogiArt logo">
+            <span>Mateo Cogeanu</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="projects.html">Projects</a>
+            <a href="tools.html">Tools</a>
+            <a class="active" href="games.html">Games</a>
+            <a href="social.html">Social</a>
+        </div>
     </nav>
 
-    <div class="container">
-        <h2>Games</h2>
-        <p>Here are some of the games I've worked on:</p>
-        <ul>
-            <li><a href="https://cogiart.itch.io/bobs-mystical-adventure">Bob's Mystical Adventure</a></li>
-            <li><a href="/BP/index.html">Bad Piggies</a></li>
-        </ul>
-    </div>
+    <header class="site-shell portal-hero">
+        <div class="portal-copy">
+            <p class="eyebrow">Games sector unlocked</p>
+            <h1>You have crossed into another universe.</h1>
+            <p class="hero-copy">The regular site drops away here. Gravity gets weird, colors get louder, and the only reasonable move is to press start.</p>
+            <div class="action-row">
+                <a class="button primary" href="https://cogiart.itch.io/bobs-mystical-adventure">Launch Bob's Adventure</a>
+                <a class="button" href="#game-library">Browse Games</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="game-library" class="site-shell game-grid">
+        <a class="game-card" href="https://cogiart.itch.io/bobs-mystical-adventure">
+            <span class="kicker">Mystic arcade</span>
+            <h2>Bob's Mystical Adventure</h2>
+            <p>Step into a surreal quest with a full tilt toward oddity, motion, and discovery.</p>
+        </a>
+        <a class="game-card" href="impossible_pong.html">
+            <span class="kicker">Arcade duel</span>
+            <h2>Impossible Pong</h2>
+            <p>A sharp little twist on the classic paddle duel.</p>
+        </a>
+        <a class="game-card" href="clicker/index.html">
+            <span class="kicker">Idle loop</span>
+            <h2>Clicker</h2>
+            <p>A simple incremental loop built for quick hits of progress.</p>
+        </a>
+        <a class="game-card" href="Portalus/index.html">
+            <span class="kicker">Portal puzzle</span>
+            <h2>PORTALUS</h2>
+            <p>A portal-driven puzzle space with levels, an editor, and its own compact engine.</p>
+        </a>
+        <a class="game-card" href="BP/index.html">
+            <span class="kicker">WebGL launch</span>
+            <h2>Bad Piggies</h2>
+            <p>Load the browser build and start assembling chaos with wheels, frames, and momentum.</p>
+        </a>
+    </main>
 </body>
 
 </html>

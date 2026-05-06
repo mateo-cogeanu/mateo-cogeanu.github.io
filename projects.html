@@ -1,73 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Projects</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 1rem 0;
-            text-align: center;
-        }
-        nav {
-            margin: 20px 0;
-            text-align: center;
-        }
-        nav a {
-            margin: 0 15px;
-            text-decoration: none;
-            color: #4CAF50;
-            font-weight: bold;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        footer {
-            text-align: center;
-            padding: 1rem 0;
-            background-color: #333;
-            color: white;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-    </style>
+    <title>Projects | Mateo Cogeanu</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <header>
-        <h1>My Projects</h1>
-    </header>
 
-    <nav>
-        <a href="index.html">Home</a>
+<body>
+    <nav class="site-shell site-nav" aria-label="Main navigation">
+        <a class="brand" href="index.html">
+            <img class="brand-mark" src="assets/CogiArt_1.jpg" alt="CogiArt logo">
+            <span>Mateo Cogeanu</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a class="active" href="projects.html">Projects</a>
+            <a href="tools.html">Tools</a>
+            <a href="games.html">Games</a>
+            <a href="social.html">Social</a>
+        </div>
     </nav>
 
-    <div class="container">
-        <h2>Projects</h2>
-        <p>Here are some of the projects I've worked on:</p>
-        <ul>
-            <li><a href="impossible_pong.html">Impossible Pong</a></li>
-            <li><a href="clicker/index.html">Clicker</a></li>
-            <li><a href="WV_MK.html">Wave Maker</a></li>
-            <li><a href="Portalus/index.html">PORTALUS</a></li>
-            <li><a href="gtrans.html">Glorp translator</a></li>
-        </ul>
-    </div>
+    <header class="site-shell hero">
+        <div>
+            <p class="eyebrow">Projects</p>
+            <h1>Small worlds with their own rules.</h1>
+            <p class="hero-copy">Generators, translators, and interactive ideas collected into one launchpad.</p>
+        </div>
+    </header>
+
+    <main class="site-shell section">
+        <div class="section-heading">
+            <h2>Project Index</h2>
+            <p>Each card opens directly into the project so the page stays quick and browsable.</p>
+        </div>
+        <div class="grid">
+            <a class="card wide" href="WV_MK.html">
+                <span class="kicker">Audio</span>
+                <h3>Wave Maker</h3>
+                <p>A hands-on wave experiment for shaping and testing sound ideas.</p>
+            </a>
+            <a class="card" href="gtrans.html">
+                <span class="kicker">Language</span>
+                <h3>Glorp Translator</h3>
+                <p>A playful translator for a less ordinary vocabulary.</p>
+            </a>
+        </div>
+    </main>
+
+    <footer class="site-shell footer">
+        Projects by Mateo Cogeanu.
+    </footer>
 </body>
+
 </html>
